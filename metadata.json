@@ -1,0 +1,5 @@
+{
+  "name": "FocusLock",
+  "description": "Monochrome focus session timer, app blocker with Suitcase allow-list, daily strict session scheduler, and local session statistics.",
+  "requestFramePermissions": []
+}

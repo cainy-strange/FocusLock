@@ -1,7 +1,0 @@
-<accessibility-service xmlns:android="http://schemas.android.com/apk/res/android"
-    android:description="Detects when a selected distracting app is opened so FocusLock can show its focus screen."
-    android:accessibilityEventTypes="typeWindowStateChanged|typeWindowsChanged"
-    android:accessibilityFeedbackType="feedbackGeneric"
-    android:notificationTimeout="100"
-    android:canRetrieveWindowContent="false"
-    android:accessibilityFlags="flagDefault" />

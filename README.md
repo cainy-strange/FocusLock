@@ -1,54 +1,34 @@
-# FocusLock — Android MVP source
+# FocusLock — React Web App
 
-FocusLock is a native Kotlin + Jetpack Compose Android focus blocker with a Nothing-inspired monochrome interface.
+FocusLock is a React + TypeScript + Tailwind CSS rewrite of the original Kotlin/Jetpack Compose Android focus blocker (`cainy-strange/FocusLock`), preserving its Nothing-inspired monochrome interface (`#080808` / `#171717` / `#FF5A36`) and core business logic.
 
-## Included in this MVP
+## Features
 
-- Strict and flexible timed focus sessions
-- Select installed launcher apps to block
-- Suitcase allow-list (allowed apps are not blocked even if also selected)
-- Daily scheduled strict sessions
-- Local Room session history, focus totals and a basic streak counter
-- DataStore-backed settings; no account, analytics SDK, ads or network permission
+- **Timed Focus Sessions (`FOCUS`)**: Start `STRICT` or `FLEXIBLE` sessions from 5 to 180 minutes (5-minute increments) with a live countdown timer and automatic session completion logging.
+- **App Control & Suitcase Allow-List (`APPS`)**: Mark apps as `BLOCK` or `ALLOW` (Suitcase allow-list takes precedence so allowed apps remain accessible even if also marked blocked). Use `OPEN` on any row to test the blocking decision engine during an active session.
+- **Blocking Overlay (`BlockingScreen`)**: Full-screen focus screen ported from `BlockingActivity.kt`. Displays live remaining time, allows ending early in `FLEXIBLE` mode, and enforces strict messaging in `STRICT` mode.
+- **Daily Automation (`SCHEDULE`)**: Configure a daily `STRICT` focus session with start time and duration (15–180 minutes). Automatically triggers when the scheduled minute arrives while FocusLock is open.
+- **Session Statistics & Streak (`STATS`)**: Tracks total focused time, consecutive daily streak, completed session count, and full session history (`COMPLETED` vs `ENDED EARLY`), persisted in `localStorage`.
 
-## Open in Android Studio
+## Running Locally
 
-1. Install a current Android Studio release and Android SDK Platform 36.
-2. Make sure Android Studio uses JDK 17 (Settings → Build Tools → Gradle → Gradle JDK).
-3. Extract this ZIP and open the `focuslock` folder (the folder containing `settings.gradle.kts`).
-4. Allow Gradle sync. If Android Studio asks to create/update Gradle wrapper files, accept its recommended compatible Gradle 8.13+ distribution.
-5. Connect an Android phone with USB debugging enabled, or create an emulator, then press Run.
+```bash
+npm install
+npm run dev
+```
 
-The project uses AGP 8.13.2, Kotlin 2.2.21, Compose BOM 2026.09.00, Room 2.8.4 and compileSdk 36. If your installed Android Studio is older, update it rather than downgrading random dependencies.
+The dev server listens on `http://0.0.0.0:3000`.
 
-## First-run setup on your phone
+### Build & Type-Check
 
-1. Open FocusLock → FOCUS → `OPEN` beside Accessibility service.
-2. Find FocusLock in Installed apps/services and enable it. Android displays a sensitive-permission warning because Accessibility can observe app-window changes. This build only uses the event package name to decide whether to show the blocker; it does not read screen text or transmit data.
-3. Return to FocusLock. Select apps in APPS. Add essential apps to ALLOW (Suitcase).
-4. Start a short 2-minute FLEXIBLE test session first. Verify that a selected app shows the blocking screen and an allowed app remains accessible.
-5. Test STRICT only after flexible mode works.
-6. For schedules, save a daily start time. Exact alarms are used only when Android allows them; otherwise Android may deliver the session later. Battery restrictions and OEM background limits can affect reliability.
+```bash
+npm run lint
+npm run build
+```
 
-## Important limitations — read before relying on it
+## Web Limitations vs. Native Android
 
-- This is an MVP, not a tamper-proof parental-control/device-owner product. A normal app cannot prevent uninstall, force-stop, disabling Accessibility, safe mode, or all system-level escape paths.
-- The blocker launches a dedicated Activity from the Accessibility Service. Android background-activity-launch rules and OEM customisations vary. If a device blocks that launch, a production version should use a carefully implemented `TYPE_ACCESSIBILITY_OVERLAY` window and test it on each target Android/OEM version.
-- Scheduled start is daily. Android may delay inexact alarms; users may need to grant Alarms & reminders special access. Reboot rescheduling is included.
-- App discovery uses `QUERY_ALL_PACKAGES`. Google Play restricts broad package visibility; Play distribution requires a valid policy justification and review. For a personal sideload build this is easier to test.
-- Usage access settings are linked, but per-app usage analytics are not yet implemented. Statistics currently report FocusLock session history, not total phone screen time.
-- A session that ends while no blocked app is opened may not be written to history in this first MVP. The next hardening pass should move session completion into a durable timer/worker and test process death.
-- Strict mode means no in-app early-stop control. It cannot stop the user from revoking permissions or uninstalling the app.
-
-## Package structure
-
-- `MainActivity.kt` — Compose screens and navigation
-- `BlockingActivity.kt` — countdown blocker screen
-- `service/FocusAccessibilityService.kt` — foreground app event handling
-- `service/ScheduleReceiver.kt` — daily alarm and reboot rescheduling
-- `data/Prefs.kt` — DataStore settings and session state
-- `data/FocusDatabase.kt`, `data/Session.kt` — Room session history
-
-## Privacy
-
-The app declares no INTERNET permission and has no remote backend. App package names and focus history remain on-device in DataStore/Room. Accessibility and Usage Access are powerful permissions; only enable them if you understand and accept their scope.
+- **Installed App Discovery**: Browsers cannot access Android's `PackageManager` (`QUERY_ALL_PACKAGES`), so `APPS` uses a curated catalog of common launcher apps (`src/data/defaultApps.ts`).
+- **System-Level App Blocking**: Browsers cannot run an Android `AccessibilityService` to intercept other OS apps. Blocking logic (`src/services/focusEngine.ts`) is enforced via the in-app `OPEN` test launcher and `PREVIEW BLOCKING SCREEN` control.
+- **Background Alarms**: Android `AlarmManager` and `BOOT_COMPLETED` receivers are unavailable in a web app. Scheduled daily `STRICT` sessions run automatically while FocusLock is open in the browser.
+- **Usage Access Analytics**: Matches the original MVP — Usage Access settings are represented in the UI, while `STATS` reports FocusLock session history rather than OS-wide screen time.

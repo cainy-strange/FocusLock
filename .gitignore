@@ -1,23 +1,19 @@
-
-# Gradle
-.gradle/
-**/build/
-!gradle/wrapper/gradle-wrapper.jar
-!gradle/wrapper/gradle-wrapper.properties
-
-# Local configuration
-local.properties
-*.iml
-
-# Android Studio
-.idea/
-.DS_Store
-
 # Logs
+logs
 *.log
+npm-debug.log*
 
-# Secrets
-secrets.properties
-keystore.properties
-*.jks
-*.keystore
+# Dependencies & build output
+node_modules/
+dist/
+dist-ssr/
+
+# Local env files
+.env
+.env.local
+.env.*.local
+
+# Editor & OS files
+.DS_Store
+.idea/
+.vscode/
